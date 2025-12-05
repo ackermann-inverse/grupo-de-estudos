@@ -1,5 +1,9 @@
 # 📬 Azure Service Bus — Grupo de Estudos: **Tópicos, Assinaturas e Mensageria Avançada** (≈1h)
 
+| Data | Apresentador do encontro |
+|-:|:-|
+| 12/10/2025 15:00 | [Ruan Pato](https://ruanpato.com) |
+
 > 🎯 **Público‑alvo:** programadores. **Objetivo:** entender **do zero ao avançado** filas, **tópicos & assinaturas**, **filtros & ações**, **sessões (FIFO)**, **locks & settlement**, **DLQ**, **detecção de duplicidade**, **AMQP 1.0 & SDKs**, **limitações**, **casos de uso**, **emulador**, e padrões correlatos (Inbox/Outbox, idempotência, etc.).
 
 ## 🧭 Sumário
