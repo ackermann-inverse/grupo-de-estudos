@@ -1,0 +1,16 @@
+{
+  "name": "concurrency-benchmark-node",
+  "version": "1.0.0",
+  "description": "Benchmark de concorrência e paralelismo em Node.js",
+  "main": "src/benchmark.sequential.js",
+  "type": "module",
+  "scripts": {
+    "start:seq": "node src/benchmark.sequential.js",
+    "start:concurrent": "node src/benchmark.concurrent.js",
+    "start:parallel": "node src/benchmark.parallel.js"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=20"
+  }
+}
