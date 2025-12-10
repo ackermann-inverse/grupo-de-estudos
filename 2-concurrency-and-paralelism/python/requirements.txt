@@ -1,0 +1,1 @@
+# nenhuma dependência externa é necessária para este benchmark
