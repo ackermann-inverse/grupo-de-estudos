@@ -1,0 +1,10 @@
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+COPY package.json ./
+RUN npm install --production
+
+COPY src ./src
+
+CMD ["sh", "-c", "echo 'Use npm run start:seq|start:concurrent|start:parallel' && npm run start:seq"]
