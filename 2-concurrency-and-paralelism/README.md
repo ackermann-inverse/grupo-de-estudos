@@ -280,22 +280,35 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    subgraph Node_js
-        NQ[Fila de tarefas HTTP] --> NPool[Promise pool com limite de 20]
-        NPool -->|até 20 chamadas em voo| NIO[I/O externo]
+    subgraph Node_js[Node.js]
+        NQ[Fila de tarefas HTTP]
+        NPool[Promise pool com limite de 20]
+        NIO[Chamadas de I/O externo]
+        NDone[Resultados acumulados]
+
+        NQ --> NPool
+        NPool -->|"até 20 chamadas em voo"| NIO
         NIO --> NPool
-        NPool --> NDone[Resultados acumulados]
+        NPool --> NDone
     end
 
-    subgraph Go
-        GQ[Channel de tarefas] --> GWorkers[[20 goroutines workers]]
-        GWorkers --> GIO[I/O externo]
+    subgraph Go[Go]
+        GQ[Channel de tarefas]
+        GWorkers[[20 goroutines workers]]
+        GIO[Chamadas de I/O externo]
+        GDone[Resultados acumulados]
+
+        GQ --> GWorkers
+        GWorkers --> GIO
         GIO --> GWorkers
-        GWorkers --> GDone[Resultados acumulados]
+        GWorkers --> GDone
     end
 
-    note right of Node_js: Com chunks simples de 20 e Promise.all,<br>uma chamada muito lenta pode segurar o próximo chunk.
-    note right of Go: Com pool de workers, assim que um worker termina,<br>ele pega uma nova tarefa do channel.
+    NNote[Em Node.js, com pool fixo de 20 Promises, uma chamada muito lenta pode atrasar o próximo grupo de tarefas.]
+    GNote[Em Go, o pool de workers lê do channel: quando um worker termina, ele já pega a próxima tarefa disponível.]
+
+    NPool -.-> NNote
+    GWorkers -.-> GNote
 ```
 
 ### 🔐 4.4 Memória compartilhada vs mensagens
