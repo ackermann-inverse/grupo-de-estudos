@@ -67,7 +67,7 @@
     - [📚 8.7 CPU-bound, I/O-bound, memory-bound, cache-bound](#-87-cpu-bound-io-bound-memory-bound-cache-bound)
     - [📚 8.8 Observabilidade, profiling e ferramentas](#-88-observabilidade-profiling-e-ferramentas)
     - [📚 8.9 Benchmarks](#-89-benchmarks)
-    - [📚 8.10 LGC](#-810-lgc)
+    - [📚 8.10 LCG](#-810-lcg)
 
 ---
 
@@ -82,7 +82,7 @@ Comparar, de forma prática e conceitual, como **Node.js**, **Python (com e sem 
 Foco do encontro:
 
 - [ ] Entender claramente o que é concorrência e o que é paralelismo  
-- [ ]Relacionar esses conceitos com workloads CPU-bound, I/O-bound, memory-bound e cache-bound  
+- [ ] Relacionar esses conceitos com workloads CPU-bound, I/O-bound, memory-bound e cache-bound  
 - [ ] Entender o modelo de execução de cada linguagem e como ela trata erros, gargalos, observabilidade e legibilidade  
 - [ ] Sair com intuição de nível enterprise para tomar decisões em sistemas reais de backend e ML
 
@@ -202,8 +202,8 @@ Dois estilos principais para coordenar tarefas:
 Problemas comuns:
 
 - Race conditions: duas tarefas acessam ou modificam estado compartilhado sem coordenação adequada
-- Deadlocks: conjunto de tarefas esperando recursos umas das outras, ninguém progride
-- Starvation: uma tarefa nunca recebe tempo de CPU ou acesso ao recurso
+- Deadlocks: conjunto de tarefas esperando recursos umas das outras, ninguém progride (Dining philosophers problem)
+- Starvation: uma tarefa nunca recebe tempo de CPU ou acesso ao recurso (Dining philosophers problem)
 - Lock contention: threads demais disputando o mesmo lock reduzem o throughput
 - False sharing: variáveis independentes na mesma cache line fazem várias CPUs brigarem na mesma região de memória
 - Oversubscription: criar mais threads do que núcleos, gerando overhead excessivo de escalonamento
@@ -664,6 +664,8 @@ Alguns princípios úteis:
   https://www.heroku.com/blog/concurrency_is_not_parallelism/  
 - Artigo curto, "Concurrency is not Parallelism" (resumo da ideia)  
   https://kwahome.medium.com/concurrency-is-not-parallelism-a5451d1cde8d  
+- Dining philosophers problem
+  https://en.wikipedia.org/wiki/Dining_philosophers_problem
 
 ### 📚 8.2 JavaScript e Node.js
 
@@ -747,6 +749,6 @@ Alguns princípios úteis:
 - hyperfine, ferramenta de benchmark de linha de comando  
   https://github.com/sharkdp/hyperfine  
 
-### 📚 8.10 LGC
+### 📚 8.10 LCG
 - Linear congruential generator
   https://en.wikipedia.org/wiki/Linear_congruential_generator
