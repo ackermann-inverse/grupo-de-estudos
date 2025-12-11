@@ -4,6 +4,12 @@
 |-:|:-|
 | 10/12/2025 19:00 | [Ruan Pato](https://ruanpato.com) |
 
+| Presentes |
+|:-|
+| [Otávio Pato](https://github.com/otaviopato) |
+| [Patrick Luz](https://github.com/patrickluzdev) |
+| [Ruan Pato](https://ruanpato.com) |
+
 ## Sumário
 
 - [🧵 Concorrência vs Paralelismo](#-concorrência-vs-paralelismo)
