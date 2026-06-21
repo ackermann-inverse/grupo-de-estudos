@@ -9,9 +9,17 @@ lerna-debug.log*
 .DS_Store
 
 *.pyc
+__pycache__/
+.pytest_cache/
 # Python virtualenvs
 .venv/
 venv/
+
+# Encontro 5 (Context Engineering, RAG & Memória): stores de runtime das POCs.
+# O conteúdo persistido em runtime NÃO é versionado; apenas os seeds .json em
+# demos/poc3_memory/seed/ ficam no git. Ver demos/poc3_memory/README.md.
+**/.runtime/
+**/memory_store.json
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

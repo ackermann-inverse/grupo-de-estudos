@@ -1,0 +1,13 @@
+# Dependências mínimas e auditáveis das POCs deste encontro.
+# Objetivo pedagógico: o conceito deve ficar visível no código, não escondido
+# atrás de um framework. Por isso NÃO usamos LangChain/LlamaIndex aqui.
+#
+# requests  -> cliente HTTP simples para falar com o Ollama (/api/...).
+# pytest    -> testes reprodutíveis (rodam no modo MOCK, sem baixar modelo).
+#
+# Propositalmente NÃO dependemos de numpy nem de uma lib de frontmatter: o cosseno
+# e o parser de metadados são ~15 linhas cada e ficam visíveis no código (ver
+# demos/common/textutil.py e demos/common/corpus.py). Menos dependência, mais clareza.
+
+requests>=2.31,<3
+pytest>=7.4,<9

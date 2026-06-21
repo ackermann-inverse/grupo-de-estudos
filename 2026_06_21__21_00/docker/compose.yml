@@ -1,0 +1,43 @@
+# Caminho ALTERNATIVO (CPU-only): Ollama + app em containers.
+# Uso:
+#   docker compose -f docker/compose.yml up --build
+#   # baixe os modelos uma vez (ficam no volume 'ollama'):
+#   docker compose -f docker/compose.yml exec ollama ollama pull nomic-embed-text
+#   docker compose -f docker/compose.yml exec ollama ollama pull llama3.2:3b
+#
+# Observação honesta: este caminho roda em CPU. A primeira inferência é lenta
+# (carrega o modelo na RAM). Para máquinas com <= 8 GB, troque GEN_MODEL por
+# llama3.2:1b no serviço 'app'.
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ce-rag-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ce-rag-app
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      GEN_MODEL: llama3.2:3b
+      EMBED_MODEL: nomic-embed-text
+    # Mantém o container vivo para rodar as POCs interativamente:
+    #   docker compose -f docker/compose.yml run --rm app python demos/poc3_memory/memory.py
+    tty: true
+
+volumes:
+  ollama:
