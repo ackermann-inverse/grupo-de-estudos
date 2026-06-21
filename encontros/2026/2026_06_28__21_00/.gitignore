@@ -1,0 +1,12 @@
+# Encontro 6 (RAG Engineering) — stack Python (+ torch opcional). O .gitignore raiz já
+# cobre globais; este torna a pasta autocontida como template.
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+!.env.example
+# stores de runtime das POCs (ex.: trace JSONL da POC D)
+**/.runtime/
+**/memory_store.json

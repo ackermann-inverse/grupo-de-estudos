@@ -1,0 +1,18 @@
+# Encontro 2 (Concorrência vs Paralelismo) — poliglota Go/Node/Python.
+# O .gitignore raiz já cobre globais; este torna a pasta autocontida.
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+
+# Go
+bin/
+pkg/
+
+# Saídas dos benchmarks
+results/

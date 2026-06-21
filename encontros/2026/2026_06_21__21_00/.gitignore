@@ -1,0 +1,12 @@
+# Encontro 5 — stack Python. (O .gitignore raiz já cobre globais; este torna a pasta
+# autocontida como template.)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+!.env.example
+# stores de runtime das POCs
+**/.runtime/
+**/memory_store.json
