@@ -1,0 +1,53 @@
+# Parte 2 — RAG Engineering. Experiência de execução em poucos comandos.
+
+.DEFAULT_GOAL := help
+SHELL := /bin/bash
+PY := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || echo python3)
+
+.PHONY: help setup demo test test-real clean retrieval rerank eval sweep observe cross extra docker-up docker-down
+
+help: ## mostra esta ajuda
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	 | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+
+setup: ## cria venv, instala deps e orienta o download dos modelos
+	@bash scripts/setup.sh
+
+extra: ## instala o cross-encoder REAL (pesado, ~1-2 GB: torch + sentence-transformers)
+	@.venv/bin/pip install -r requirements-extra.txt
+
+demo: ## demo principal: harness de avaliação (POC C)
+	@bash scripts/demo.sh
+
+test: ## testes em modo MOCK (não baixa modelo)
+	@bash scripts/test.sh
+
+test-real: ## testes usando o Ollama real (precisa estar no ar)
+	@USE_MOCK=0 bash scripts/test.sh
+
+clean: ## remove venv, caches e stores de runtime
+	@bash scripts/clean.sh
+
+retrieval: ## POC A — dense × lexical × híbrido
+	@$(PY) demos/poc_a_retrieval/retrieval.py --query "código da entrega econômica"
+
+rerank: ## POC B — reranking por LLM
+	@$(PY) demos/poc_b_rerank/rerank.py --reranker llm --query "prazo de reembolso e estorno"
+
+eval: ## POC C — RAG evaluation harness
+	@$(PY) demos/poc_c_eval/evaluate.py
+
+sweep: ## POC C — recall@k vs dimensão do embedding (Matryoshka)
+	@$(PY) demos/poc_c_eval/evaluate.py --dims-sweep
+
+observe: ## POC D — trace estruturado de uma consulta
+	@$(PY) demos/poc_d_observability/observe.py
+
+cross: ## POC B — cross-encoder REAL (requer 'make extra')
+	@$(PY) demos/poc_b_rerank/rerank.py --reranker cross --query "garantia do SKU-4471"
+
+docker-up: ## sobe Ollama + app via Docker Compose
+	@docker compose -f docker/compose.yml up --build
+
+docker-down: ## derruba o Compose
+	@docker compose -f docker/compose.yml down

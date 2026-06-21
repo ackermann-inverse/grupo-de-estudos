@@ -1,0 +1,11 @@
+# OPCIONAL — só para o cross-encoder REAL (reranker "cross" na POC B).
+#
+# AVISO HONESTO: isto puxa o PyTorch e baixa um modelo (~1–2 GB no total). Contraria
+# o caminho leve do encontro. Use SOMENTE se quiser demonstrar um cross-encoder de
+# verdade; o caminho padrão (reranker "llm" via Ollama) NÃO precisa disto.
+#
+# Instale com:  pip install -r requirements-extra.txt
+# Modelo padrão (multilíngue, funciona com PT-BR): cross-encoder/mmarco-mMiniLMv2-L12-H384-v1
+# Troque via env CROSS_ENCODER_MODEL se quiser outro.
+
+sentence-transformers>=3.0,<6

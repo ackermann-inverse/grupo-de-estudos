@@ -1,5 +1,10 @@
 # 🔎 Parte 2 — RAG Engineering (extensão)
 
+> ✅ **Promovido para encontro próprio com POCs rodáveis:**
+> [`../../2026_06_28__21_00/`](../../2026_06_28__21_00/README.md) (RAG Engineering, com
+> retrieval/rerank/avaliação/observabilidade executáveis). **Esta pasta** permanece como
+> o **plano/gancho** original (notas didáticas) da parte 2, referenciado pelo encontro 1.
+
 > **Continuação possível** do encontro [Context Engineering, RAG & Memória](../README.md),
 > não obrigação dele. Este material está preparado para virar um **segundo encontro de
 > até 1 hora**: copie/mova esta pasta e ajuste o que quiser.

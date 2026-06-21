@@ -1,0 +1,12 @@
+{"query": "qual é o prazo de reembolso de uma compra cancelada?", "relevant_doc_ids": ["politica-reembolso"], "answer_substr": "30 dias", "tenant": "mercania"}
+{"query": "como faço uma troca por arrependimento?", "relevant_doc_ids": ["politica-troca"], "answer_substr": "7 dias", "tenant": "mercania"}
+{"query": "quanto tempo demora a entrega expressa nas capitais?", "relevant_doc_ids": ["prazo-entrega"], "answer_substr": "48 horas", "tenant": "mercania"}
+{"query": "qual a garantia da cafeteira SKU-4471?", "relevant_doc_ids": ["garantia"], "answer_substr": "12 meses", "tenant": "mercania"}
+{"query": "posso pagar com PIX e tem desconto?", "relevant_doc_ids": ["pagamentos"], "answer_substr": "PIX", "tenant": "mercania"}
+{"query": "em quantas vezes posso parcelar no cartão?", "relevant_doc_ids": ["pagamentos"], "answer_substr": "12 vezes", "tenant": "mercania"}
+{"query": "como funciona o programa de pontos de fidelidade?", "relevant_doc_ids": ["programa-fidelidade"], "answer_substr": "pontos", "tenant": "mercania"}
+{"query": "vocês têm atendimento humano aos domingos?", "relevant_doc_ids": ["horario-atendimento"], "answer_substr": "domingos", "tenant": "mercania"}
+{"query": "como ativar a verificação em duas etapas (2FA)?", "relevant_doc_ids": ["seguranca-conta"], "answer_substr": "duas etapas", "tenant": "mercania"}
+{"query": "quero exercer meu direito ao esquecimento (LGPD)", "relevant_doc_ids": ["privacidade-lgpd"], "answer_substr": "esquecimento", "tenant": "mercania"}
+{"query": "como aciono a garantia de um produto com defeito?", "relevant_doc_ids": ["garantia"], "answer_substr": "garantia", "tenant": "mercania"}
+{"query": "qual o código da entrega econômica?", "relevant_doc_ids": ["prazo-entrega"], "answer_substr": "ENTREGA-ECO-15", "tenant": "mercania"}

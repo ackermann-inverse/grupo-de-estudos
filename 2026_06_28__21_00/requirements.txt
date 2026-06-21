@@ -1,0 +1,11 @@
+# Dependências mínimas (caminho principal). Mesma filosofia da parte 1: o conceito
+# fica visível no código (chunking, cosseno, BM25, RRF, MMR à mão em demos/common/).
+#
+# requests  -> falar com o Ollama (/api/...).
+# pytest    -> testes reprodutíveis (rodam em MOCK, sem baixar modelo).
+#
+# O reranker por LLM (padrão) usa o próprio Ollama — sem dependência nova.
+# O cross-encoder REAL é OPCIONAL e pesado: ver requirements-extra.txt.
+
+requests>=2.31,<3
+pytest>=7.4,<9
