@@ -22,10 +22,14 @@ Documento de honestidade. Sem esconder o que não foi validado.
 
 ## Limitações e o que NÃO foi validado
 
-- **Cross-encoder real não foi executado nesta máquina.** O código está implementado e o
-  caminho documentado, mas não rodei `make extra` (evitar baixar torch ~1–2 GB). O
-  reranker `cross` está marcado como caminho opcional/`pragma: no cover`; **validado só
-  por inspeção**, não por execução. Os testes cobrem lexical/llm/mmr.
+- **Cross-encoder real VALIDADO por execução** (sentence-transformers 5.6.0 + torch
+  2.12.1, modelo `cross-encoder/mmarco-mMiniLMv2-L12-H384-v1`). Em CPU ele produz scores
+  **bem discriminativos** (ex.: garantia +10.8/+9.9 vs irrelevantes negativos) e, numa
+  query parafraseada ("como recebo meu dinheiro de volta?"), **puxou `politica-reembolso`
+  do 3º para o 1º** lugar — onde o híbrido falhava. **Custo observado:** ~10 s para
+  reranquear 6 docs em CPU (1ª chamada inclui warmup), na mesma ordem de grandeza do
+  llm-reranker (~6 s). Continua **opcional** (`make extra`, ~1–2 GB) e fora dos testes
+  automatizados (`pragma: no cover`); os testes cobrem lexical/llm/mmr.
 - **Matryoshka sweep não degradou no real.** No corpus pequeno/fácil, recall@5 ficou em
   1.0 de `full` até `64` dims (real, nomic). No **MOCK** (hashing) ele degrada em 128/64
   por colisão de hash — isso é artefato do mock. **O efeito real de queda existe em
