@@ -4,6 +4,13 @@
 |-:|:-|
 | 21/06/2026 21:00 | [Ruan Pato](https://ruanpato.com) |
 
+> **Apresentação com observabilidade:** veja o
+> [quickstart do Phoenix local](./docs/observabilidade-phoenix.md) para visualizar
+> prompts, respostas, embeddings e a árvore de spans das PoCs.
+
+> **Comece aqui:** o [`QUICKSTART.md`](./QUICKSTART.md) permite escolher MOCK,
+> `llama3.2:1b` ou `llama3.2:3b`, com ou sem tracing no Phoenix.
+
 > **Pergunta central:** como montar **contexto útil**, **recuperar conhecimento** e
 > manter **memória** sem bagunça nem risco?
 
@@ -648,6 +655,7 @@ de acesso geral: **2026-06-16**.
 - Packer et al., *MemGPT: Towards LLMs as Operating Systems* (2023) — <https://arxiv.org/abs/2310.08560>
 - Maharana et al., *Evaluating Very Long-Term Conversational Memory of LLM Agents* (LoCoMo, ACL 2024) — <https://arxiv.org/abs/2402.17753>
 - Chhikara et al., *Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory* (2025) — <https://arxiv.org/abs/2504.19413>
+- Quek et al., *MeMo: Memory as a Model* (2026) — <https://arxiv.org/abs/2605.15156>
 - Tulving, *Episodic and Semantic Memory* (1972) — base cognitiva da distinção semântica/episódica.
 
 ### 11.5 Segurança (injeção, poisoning)

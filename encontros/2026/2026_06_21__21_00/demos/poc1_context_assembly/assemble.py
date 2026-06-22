@@ -5,8 +5,9 @@ isolamento, atualização e proveniência sob um orçamento de tokens.
 
 Esta POC monta o contexto para uma mesma pergunta de duas formas e mostra que a
 resposta muda:
-  - INGÊNUA: concatena todas as fontes na ordem em que chegaram, sem orçamento,
-    com informação conflitante/obsoleta e sem proveniência.
+  - INGÊNUA: concatena fontes na ordem de chegada até o limite do runtime. A
+    cauda é truncada sem seleção; a política vigente fica de fora, enquanto a
+    obsoleta permanece. Não há proveniência.
   - COM CRITÉRIOS: aplica orçamento, prioridade, relevância, recência, resolução
     de conflito (invalida o obsoleto), deduplicação, ordenação anti-"lost in the
     middle" (bookend) e rótulos de proveniência.
@@ -27,8 +28,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from common.ollama_client import make_client  # noqa: E402
 from common.textutil import approx_tokens  # noqa: E402
+from common.tracing import banner, traced  # noqa: E402
 
 PERGUNTA = "Qual é o prazo de reembolso de uma compra cancelada?"
+NAIVE_RUNTIME_BUDGET = int(os.environ.get("POC1_NAIVE_BUDGET", "75"))
+BUDGETED_RUNTIME_BUDGET = int(os.environ.get("POC1_BUDGET", "75"))
 
 SISTEMA = (
     "Você é um assistente de suporte da loja Mercânia. Responda em uma frase, "
@@ -112,8 +116,42 @@ def assemble_naive(itens: list[ContextItem]) -> str:
     return "\n".join(linhas)
 
 
+def assemble_naive_until_limit(
+    itens: list[ContextItem], *, budget_tokens: int = NAIVE_RUNTIME_BUDGET
+) -> tuple[str, dict]:
+    """Simula um pipeline que preenche o prompt por ordem de chegada.
+
+    Quando o próximo item não cabe, ele e toda a cauda são truncados. Não há
+    resolução de conflito, score, recência ou tentativa de preservar evidência.
+    O corte é propositalmente explícito no relatório para não fingir que foi uma
+    decisão do modelo.
+    """
+    incluidos: list[ContextItem] = []
+    usados = 0
+    primeiro_truncado: str | None = None
+
+    for item in itens:
+        if usados + item.n_tokens > budget_tokens:
+            primeiro_truncado = item.id
+            break
+        incluidos.append(item)
+        usados += item.n_tokens
+
+    ids_incluidos = {item.id for item in incluidos}
+    truncados = [item.id for item in itens if item.id not in ids_incluidos]
+    contexto = "\n".join(item.texto for item in incluidos)
+    return contexto, {
+        "estrategia": "ordem de chegada + corte da cauda",
+        "orcamento_tokens": budget_tokens,
+        "tokens_usados": usados,
+        "incluidos": [item.id for item in incluidos],
+        "primeiro_truncado": primeiro_truncado,
+        "truncados": truncados,
+    }
+
+
 def assemble_budgeted(
-    itens: list[ContextItem], *, budget_tokens: int = 90
+    itens: list[ContextItem], *, budget_tokens: int = BUDGETED_RUNTIME_BUDGET
 ) -> tuple[str, dict]:
     """Seleção + transformação + ordenação + isolamento sob orçamento.
 
@@ -199,18 +237,33 @@ def _bookend(itens: list[ContextItem]) -> list[ContextItem]:
     return [cabeca] + meio + [segundo]
 
 
+@traced("poc1.context_assembly")
 def main() -> None:
     client = make_client()
-    print(f"== POC1 Context Assembly ==  (modo do modelo: {client.mode})\n")
-    print(f"PERGUNTA: {PERGUNTA}\n")
+    print(f"== POC1 Context Assembly ==  (modo do modelo: {client.mode})")
+    print(banner())
+    print(f"\nENTRADA (pergunta): {PERGUNTA}\n")
 
-    ctx_naive = assemble_naive(ITENS)
-    ctx_budget, relatorio = assemble_budgeted(ITENS)
+    ctx_naive_raw = assemble_naive(ITENS)
+    ctx_naive, relatorio_naive = assemble_naive_until_limit(
+        ITENS, budget_tokens=NAIVE_RUNTIME_BUDGET
+    )
+    ctx_budget, relatorio = assemble_budgeted(
+        ITENS, budget_tokens=BUDGETED_RUNTIME_BUDGET
+    )
 
-    print("--- CONTEXTO INGÊNUO (tudo, sem critério) ---")
+    print("--- ENTRADA BRUTA DO PIPELINE INGÊNUO ---")
+    print(ctx_naive_raw)
+    print(f"\n[tokens ~{approx_tokens(ctx_naive_raw)}; itens recebidos: {len(ITENS)}]\n")
+
+    print("--- CONTEXTO INGÊNUO EFETIVO (após limite do runtime) ---")
     print(ctx_naive)
-    print(f"\n[tokens ~{approx_tokens(ctx_naive)}; itens: {len(ITENS)}; "
-          "inclui obsoleto e distratores; sem proveniência]\n")
+    print(f"\n[tokens ~{relatorio_naive['tokens_usados']}; "
+          f"itens: {len(relatorio_naive['incluidos'])}; "
+          "inclui obsoleto e distratores; sem proveniência]")
+    print("Relatório do corte ingênuo:")
+    print(json.dumps(relatorio_naive, ensure_ascii=False, indent=2))
+    print("\n>>> A política vigente v2 chegou depois do limite e NÃO foi enviada ao modelo.\n")
 
     print("--- CONTEXTO COM ORÇAMENTO E CRITÉRIOS ---")
     print(ctx_budget)
@@ -223,8 +276,11 @@ def main() -> None:
     resp_budget = client.generate(SISTEMA, _prompt(PERGUNTA, ctx_budget))
     print(f"  Ingênuo:        {resp_naive}")
     print(f"  Com critérios:  {resp_budget}")
-    print("\nObservação: o prazo VIGENTE é 30 dias. O contexto ingênuo tende a expor "
-          "a regra obsoleta (7 dias) e a soterrar a correta no meio.")
+    print("\n--- LEITURA DO EXPERIMENTO ---")
+    print("  Mesmo orçamento de contexto, duas políticas de montagem:")
+    print("  - ingênuo: ordem de chegada -> mantém v1 obsoleta e trunca v2 vigente")
+    print("  - criterioso: resolve conflito -> descarta v1 e preserva v2 com fonte")
+    print("  O prazo VIGENTE é 30 dias. A falha nasce antes da inferência.")
 
 
 def _prompt(pergunta: str, contexto: str) -> str:

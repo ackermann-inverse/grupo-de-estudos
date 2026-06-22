@@ -23,6 +23,7 @@ from common.ollama_client import make_client  # noqa: E402
 from common.observability import RagTrace, Timer, TraceLogger  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
 from common.rerankers import get_reranker  # noqa: E402
+from common.tracing import banner, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 RUNTIME = os.path.join(os.path.dirname(__file__), ".runtime")
@@ -30,6 +31,7 @@ SISTEMA = ("Você é um assistente de suporte. Responda em uma frase, só com ba
            "CONTEXTO, citando a fonte. Se não houver base, diga 'não sei'.")
 
 
+@traced("pocD.observability")
 def main() -> None:
     p = argparse.ArgumentParser(description="Observabilidade de RAG")
     p.add_argument("--query", default="qual é o prazo de reembolso?")
@@ -79,7 +81,11 @@ def main() -> None:
 
     logger = TraceLogger(os.path.join(RUNTIME, "trace.jsonl"))
     logger.log(trace)
-    print(f"== POC D · Observabilidade ==  modelo={client.mode}\n")
+    print(f"== POC D · Observabilidade ==  modelo={client.mode}")
+    print("   Esta POC tem DUAS trilhas de observabilidade:")
+    print("   (1) trace JSONL próprio, escrito em .runtime/trace.jsonl (sempre)")
+    print(banner().replace("🔭 observabilidade:", "   (2) Phoenix —"))
+    print()
     print(TraceLogger.summary(trace))
     print(f"\nTrace completo (JSONL): {os.path.relpath(os.path.join(RUNTIME, 'trace.jsonl'))}")
     print("Em produção: isto vira span OpenTelemetry (GenAI) + dashboards de qualidade, "

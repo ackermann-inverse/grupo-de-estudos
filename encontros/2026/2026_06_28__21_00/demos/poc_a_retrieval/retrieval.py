@@ -19,10 +19,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from common.ollama_client import make_client  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
+from common.tracing import banner, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 
 
+@traced("pocA.retrieval")
 def main() -> None:
     p = argparse.ArgumentParser(description="Comparação de retrieval")
     p.add_argument("--query", default="qual é o prazo de reembolso?")
@@ -32,8 +34,9 @@ def main() -> None:
 
     client = make_client()
     index = RagIndex(client, CORPUS_DIR)
-    print(f"== POC A · Retrieval ==  modelo={client.mode} | index={index.index_version}\n")
-    print(f"QUERY: {args.query}\n")
+    print(f"== POC A · Retrieval ==  modelo={client.mode} | index={index.index_version}")
+    print(banner())
+    print(f"\nENTRADA (query): {args.query}\n")
 
     cols = {}
     for method in ("dense", "lexical", "hybrid"):

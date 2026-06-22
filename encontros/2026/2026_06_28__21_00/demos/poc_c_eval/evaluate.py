@@ -30,6 +30,7 @@ from common import metrics  # noqa: E402
 from common.ollama_client import make_client  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
 from common.rerankers import get_reranker  # noqa: E402
+from common.tracing import banner, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 GOLDEN = os.path.join(os.path.dirname(__file__), "..", "golden", "golden.jsonl")
@@ -91,6 +92,7 @@ def _print_agg(title: str, agg: dict) -> None:
         print(f"  {kk:<14} {vv:.3f}")
 
 
+@traced("pocC.eval")
 def main() -> None:
     p = argparse.ArgumentParser(description="RAG evaluation harness")
     p.add_argument("--k", type=int, default=5)
@@ -107,6 +109,7 @@ def main() -> None:
     golden = load_golden(GOLDEN)
     print(f"== POC C · RAG eval ==  modelo={client.mode} | {len(golden)} queries | "
           f"k={args.k} top={args.top} rerank={args.rerank}")
+    print(banner())
 
     if args.dims_sweep:
         print("\nMatryoshka — recall@k e nDCG@k por dimensão de embedding:")

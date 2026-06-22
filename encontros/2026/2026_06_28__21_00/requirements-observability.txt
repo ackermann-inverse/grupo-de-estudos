@@ -1,0 +1,7 @@
+# Observabilidade opcional para a apresentação. Não faz parte do caminho mínimo.
+arize-phoenix>=17,<18
+arize-phoenix-otel>=0.16,<0.17
+opentelemetry-sdk>=1.42,<2
+# Necessário para os SpanAttributes do OpenInference usados em demos/common/tracing.py.
+# Sem este pacote, o tracing degrada silenciosamente e NÃO emite spans.
+openinference-semantic-conventions>=0.1.12

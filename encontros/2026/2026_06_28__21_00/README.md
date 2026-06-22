@@ -188,6 +188,23 @@ tail -1 demos/poc_d_observability/.runtime/trace.jsonl   # o trace cru (JSONL)
 > Em produção isso vira span **OpenTelemetry (GenAI)** + dashboards de qualidade,
 > latência, custo e indexing lag.
 
+### Tracing visual opcional com Phoenix
+
+Além do JSONL próprio, as PoCs emitem **spans OpenInference** para o
+[Arize Phoenix](https://github.com/Arize-ai/phoenix) (UI local), o que deixa fácil ver
+no navegador *o que é o quê*: `rag.retrieve` → `ollama.embed`, `ollama.generate`, etc.
+É **opt-in** e 100% local (nada sai da máquina):
+
+```bash
+make phoenix-setup     # instala as deps de observabilidade (opcional)
+make phoenix-start     # sobe a UI em http://127.0.0.1:6006
+make trace-eval        # roda a POC C enviando spans ao Phoenix
+make phoenix-stop
+```
+
+Sem `PHOENIX_TRACING=1`, nada é enviado e as PoCs rodam igual. Detalhes em
+[`docs/observabilidade-phoenix.md`](./docs/observabilidade-phoenix.md).
+
 ---
 
 ## 🛡️ 8. Segurança de RAG

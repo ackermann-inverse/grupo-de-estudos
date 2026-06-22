@@ -3,8 +3,12 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 PY := $(shell [ -x .venv/bin/python ] && echo .venv/bin/python || echo python3)
+PHOENIX_PROJECT ?= rag-engineering-pocs
+TRACE_ENV := PHOENIX_TRACING=1 PHOENIX_PROJECT=$(PHOENIX_PROJECT)
 
-.PHONY: help setup demo test test-real clean retrieval rerank eval sweep observe cross extra docker-up docker-down
+.PHONY: help setup demo test test-real clean retrieval rerank eval sweep observe cross extra docker-up docker-down \
+	phoenix-setup phoenix-start phoenix-stop phoenix-status \
+	trace-retrieval trace-rerank trace-eval trace-observe
 
 help: ## mostra esta ajuda
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -15,6 +19,30 @@ setup: ## cria venv, instala deps e orienta o download dos modelos
 
 extra: ## instala o cross-encoder REAL (pesado, ~1-2 GB: torch + sentence-transformers)
 	@.venv/bin/pip install -r requirements-extra.txt
+
+phoenix-setup: ## instala a observabilidade opcional do Phoenix
+	@bash scripts/phoenix.sh setup
+
+phoenix-start: ## inicia a UI local do Phoenix em http://127.0.0.1:6006
+	@bash scripts/phoenix.sh start
+
+phoenix-stop: ## encerra o Phoenix local
+	@bash scripts/phoenix.sh stop
+
+phoenix-status: ## verifica se o Phoenix está online
+	@bash scripts/phoenix.sh status
+
+trace-retrieval: ## POC A com traces no Phoenix
+	@$(TRACE_ENV) $(MAKE) retrieval
+
+trace-rerank: ## POC B com traces no Phoenix
+	@$(TRACE_ENV) $(MAKE) rerank
+
+trace-eval: ## POC C (avaliação) com traces no Phoenix
+	@$(TRACE_ENV) $(MAKE) eval
+
+trace-observe: ## POC D com traces no Phoenix
+	@$(TRACE_ENV) $(MAKE) observe
 
 demo: ## demo principal: harness de avaliação (POC C)
 	@bash scripts/demo.sh

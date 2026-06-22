@@ -35,6 +35,18 @@ def test_orcamento_respeitado():
     assert relatorio["tokens_usados"] <= 90
 
 
+def test_ingenuo_trunca_vigente_e_preserva_obsoleto():
+    """O corte por ordem de chegada perde a v2 antes da chamada ao modelo."""
+    ctx, relatorio = assemble.assemble_naive_until_limit(
+        assemble.ITENS, budget_tokens=75
+    )
+    assert "7 dias corridos" in ctx
+    assert "30 dias corridos" not in ctx
+    assert "reemb-obsoleto" in relatorio["incluidos"]
+    assert "reemb-vigente" in relatorio["truncados"]
+    assert relatorio["primeiro_truncado"] == "reemb-vigente"
+
+
 def test_proveniencia_apenas_no_budget(client):
     """O contexto ingênuo não tem rótulo de fonte; o com critérios tem."""
     ctx_naive = assemble.assemble_naive(assemble.ITENS)

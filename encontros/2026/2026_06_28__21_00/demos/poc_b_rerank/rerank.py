@@ -27,10 +27,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common.ollama_client import make_client  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
 from common.rerankers import get_reranker  # noqa: E402
+from common.tracing import banner, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 
 
+@traced("pocB.rerank")
 def main() -> None:
     p = argparse.ArgumentParser(description="Reranking e diversidade")
     p.add_argument("--query", default="prazo de reembolso e estorno no cartão")
@@ -43,7 +45,9 @@ def main() -> None:
 
     client = make_client()
     index = RagIndex(client, CORPUS_DIR)
-    print(f"== POC B · Rerank ({args.reranker}) ==  modelo={client.mode}\n")
+    print(f"== POC B · Rerank ({args.reranker}) ==  modelo={client.mode}")
+    print(banner())
+    print()
     print(f"QUERY: {args.query}\n")
 
     cands = index.retrieve(args.query, method="hybrid", k=args.k, tenant=args.tenant)

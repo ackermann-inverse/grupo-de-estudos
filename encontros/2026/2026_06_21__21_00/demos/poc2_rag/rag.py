@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common.corpus import chunk_corpus, load_corpus  # noqa: E402
 from common.ollama_client import make_client  # noqa: E402
 from common.textutil import BM25, cosine, minmax, rrf, tokenize  # noqa: E402
+from common.tracing import banner, set_output, span, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 
@@ -126,16 +127,25 @@ def assemble_context(cands: list[Candidate], *, top: int) -> str:
     return "\n".join(blocos)
 
 
+@traced("poc2.rag_pipeline")
 def answer(query: str, *, method: str = "hybrid", k: int = 6, top: int = 3,
            tenant: str | None = "mercania", include_adversarial: bool = False,
            client=None) -> dict:
     client = client or make_client(quiet=True)
     index = RagIndex(client, include_adversarial=include_adversarial)
-    cands = index.retrieve(query, method=method, k=k, tenant=tenant)
-    reranked = index.rerank(query, cands)
-    contexto = assemble_context(reranked, top=top)
+    with span("poc2.retrieve", kind="RETRIEVER",
+              inputs={"query": query, "method": method, "k": k, "tenant": tenant}) as cur:
+        cands = index.retrieve(query, method=method, k=k, tenant=tenant)
+        set_output(cur, {"candidatos": [c.chunk_id for c in cands]})
+    with span("poc2.rerank", kind="RERANKER", inputs={"query": query}) as cur:
+        reranked = index.rerank(query, cands)
+        set_output(cur, {"ordenados": [c.chunk_id for c in reranked]})
+    with span("poc2.assemble_context", kind="CHAIN",
+              inputs={"top": top, "chunks": [c.chunk_id for c in reranked[:top]]}) as cur:
+        contexto = assemble_context(reranked, top=top)
+        set_output(cur, {"fontes": sorted({c.doc_id for c in reranked[:top]})})
     prompt = f"CONTEXTO:\n{contexto}\n\nPERGUNTA: {query}\nRESPOSTA:"
-    resposta = client.generate(SISTEMA, prompt)
+    resposta = client.generate(SISTEMA, prompt)  # span LLM criado pelo client
     return {
         "query": query, "method": method, "tenant": tenant,
         "candidatos": cands, "escolhidos": reranked[:top],
@@ -145,8 +155,9 @@ def answer(query: str, *, method: str = "hybrid", k: int = 6, top: int = 3,
 
 def _print_result(res: dict, *, show_scores: bool) -> None:
     print(f"== POC2 RAG ==  método={res['method']} | tenant={res['tenant']} | "
-          f"modelo={res['mode']}\n")
-    print(f"QUERY: {res['query']}\n")
+          f"modelo={res['mode']}")
+    print(banner())
+    print(f"\nENTRADA (query): {res['query']}\n")
     print("CANDIDATOS RECUPERADOS (após filtro por tenant):")
     for c in res["candidatos"]:
         line = f"  - {c.chunk_id:28s} [{c.meta.get('tenant','?')}/{c.meta.get('status','?')}]"

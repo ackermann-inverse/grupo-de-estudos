@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 
 from .corpus import chunk_corpus, load_corpus
 from .textutil import BM25, cosine, minmax, rrf, tokenize
+from .tracing import set_output, span
 
 
 @dataclass
@@ -76,34 +77,40 @@ class RagIndex:
 
     def retrieve(self, query: str, *, method: str = "hybrid", k: int = 8,
                  tenant: str | None = "mercania") -> list[Candidate]:
-        dense = self.dense_scores(query)
-        lexical = self.lexical_scores(query)
-        order = list(range(len(self.chunks)))
-        if method == "dense":
-            ranked = sorted(order, key=lambda i: dense[i], reverse=True)
-        elif method == "lexical":
-            ranked = sorted(order, key=lambda i: lexical[i], reverse=True)
-        elif method == "hybrid":
-            dr = sorted(order, key=lambda i: dense[i], reverse=True)
-            lr = sorted(order, key=lambda i: lexical[i], reverse=True)
-            ranked = [doc_id for doc_id, _ in rrf([dr, lr])]
-        else:
-            raise ValueError(f"método desconhecido: {method}")
+        with span(
+            f"rag.retrieve:{method}", kind="RETRIEVER",
+            inputs={"query": query, "method": method, "k": k, "tenant": tenant},
+            attributes={"retrieval.index_version": self.index_version},
+        ) as cur:
+            dense = self.dense_scores(query)   # gera um span ollama.embed aninhado
+            lexical = self.lexical_scores(query)
+            order = list(range(len(self.chunks)))
+            if method == "dense":
+                ranked = sorted(order, key=lambda i: dense[i], reverse=True)
+            elif method == "lexical":
+                ranked = sorted(order, key=lambda i: lexical[i], reverse=True)
+            elif method == "hybrid":
+                dr = sorted(order, key=lambda i: dense[i], reverse=True)
+                lr = sorted(order, key=lambda i: lexical[i], reverse=True)
+                ranked = [doc_id for doc_id, _ in rrf([dr, lr])]
+            else:
+                raise ValueError(f"método desconhecido: {method}")
 
-        nd, nl = minmax(dense), minmax(lexical)
-        # fused score para exibição (RRF normalizado por posição não é trivial; usamos
-        # média dos scores normalizados só para mostrar uma coluna comparável)
-        cands: list[Candidate] = []
-        for i in ranked:
-            c = self.chunks[i]
-            # FAIL-CLOSED: tenant informado exige match exato; sem rótulo = negado.
-            if tenant is not None and c.meta.get("tenant") != tenant:
-                continue
-            cands.append(Candidate(
-                chunk_id=c.id, doc_id=c.doc_id, text=c.text, meta=c.meta,
-                dense=nd[i], lexical=nl[i], fused=(nd[i] + nl[i]) / 2,
-                embedding=self.embeddings[i],
-            ))
-            if len(cands) >= k:
-                break
-        return cands
+            nd, nl = minmax(dense), minmax(lexical)
+            # fused score para exibição (RRF normalizado por posição não é trivial; usamos
+            # média dos scores normalizados só para mostrar uma coluna comparável)
+            cands: list[Candidate] = []
+            for i in ranked:
+                c = self.chunks[i]
+                # FAIL-CLOSED: tenant informado exige match exato; sem rótulo = negado.
+                if tenant is not None and c.meta.get("tenant") != tenant:
+                    continue
+                cands.append(Candidate(
+                    chunk_id=c.id, doc_id=c.doc_id, text=c.text, meta=c.meta,
+                    dense=nd[i], lexical=nl[i], fused=(nd[i] + nl[i]) / 2,
+                    embedding=self.embeddings[i],
+                ))
+                if len(cands) >= k:
+                    break
+            set_output(cur, {"candidatos": [c.chunk_id for c in cands]})
+            return cands

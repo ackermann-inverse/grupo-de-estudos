@@ -27,6 +27,8 @@ import os
 import re
 from dataclasses import dataclass
 
+from common.tracing import set_output, span
+
 try:
     import requests
 except ImportError:  # pragma: no cover - requests só é exigido no caminho real
@@ -204,37 +206,52 @@ class Client:
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         self.embed_calls += len(texts)
-        if self.mode == "mock":
-            return [_mock_embed_one(t) for t in texts]
-        out: list[list[float]] = []
-        for t in texts:
-            r = requests.post(
-                f"{self.host}/api/embeddings",
-                json={"model": self.embed_model, "prompt": t},
-                timeout=120,
-            )
-            r.raise_for_status()
-            out.append(r.json()["embedding"])
-        return out
+        with span(
+            "ollama.embed", kind="EMBEDDING",
+            inputs={"texts": [t[:300] for t in texts[:5]], "count": len(texts)},
+            attributes={"embedding.model_name": self.embed_model, "llm.provider": self.mode},
+        ) as cur:
+            if self.mode == "mock":
+                out = [_mock_embed_one(t) for t in texts]
+            else:
+                out = []
+                for t in texts:
+                    r = requests.post(
+                        f"{self.host}/api/embeddings",
+                        json={"model": self.embed_model, "prompt": t},
+                        timeout=120,
+                    )
+                    r.raise_for_status()
+                    out.append(r.json()["embedding"])
+            set_output(cur, {"vectors": len(out), "dimensions": len(out[0]) if out else 0})
+            return out
 
     def generate(self, system: str, prompt: str, *, json_format: bool = False) -> str:
         self.gen_calls += 1
-        if self.mode == "mock":
-            return _mock_generate(system, prompt)
-        payload = {
-            "model": self.gen_model,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": prompt},
-            ],
-            "stream": False,
-            "options": {"temperature": 0},
-        }
-        if json_format:
-            payload["format"] = "json"
-        r = requests.post(f"{self.host}/api/chat", json=payload, timeout=300)
-        r.raise_for_status()
-        return r.json()["message"]["content"]
+        with span(
+            "ollama.generate", kind="LLM",
+            inputs={"system": system[:300], "prompt": prompt[:800]},
+            attributes={"llm.model_name": self.gen_model, "llm.provider": self.mode},
+        ) as cur:
+            if self.mode == "mock":
+                out = _mock_generate(system, prompt)
+            else:
+                payload = {
+                    "model": self.gen_model,
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "stream": False,
+                    "options": {"temperature": 0},
+                }
+                if json_format:
+                    payload["format"] = "json"
+                r = requests.post(f"{self.host}/api/chat", json=payload, timeout=300)
+                r.raise_for_status()
+                out = r.json()["message"]["content"]
+            set_output(cur, out)
+            return out
 
 
 def _ollama_up(host: str) -> bool:

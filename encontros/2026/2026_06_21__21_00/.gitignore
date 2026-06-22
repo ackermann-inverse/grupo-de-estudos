@@ -10,3 +10,4 @@ __pycache__/
 # stores de runtime das POCs
 **/.runtime/
 **/memory_store.json
+.phoenix/
