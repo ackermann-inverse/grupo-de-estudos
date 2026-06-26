@@ -4,12 +4,12 @@ title: RAG Engineering (parte 2)
 description: Recuperar bem, avaliar e observar. RAG é superfície de ataque, não escudo.
 author: Ruan Pato
 paginate: true
-theme: default
+theme: grupo-estudos
 ---
 
 <!-- _class: lead -->
 
-# 🔎 RAG Engineering (parte 2)
+# RAG Engineering (parte 2)
 
 ### Recuperar é fácil. Recuperar **bem**, **avaliar** e **observar** é o trabalho.
 

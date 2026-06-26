@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common.ollama_client import make_client  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
 from common.rerankers import get_reranker  # noqa: E402
-from common.tracing import banner, traced  # noqa: E402
+from common.tracing import banner, explain_card, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 
@@ -44,11 +44,12 @@ def main() -> None:
     args = p.parse_args()
 
     client = make_client()
-    index = RagIndex(client, CORPUS_DIR)
     print(f"== POC B · Rerank ({args.reranker}) ==  modelo={client.mode}")
     print(banner())
     print()
     print(f"QUERY: {args.query}\n")
+    index = RagIndex(client, CORPUS_DIR)
+    print(f"ÍNDICE: {index.index_version}\n")
 
     cands = index.retrieve(args.query, method="hybrid", k=args.k, tenant=args.tenant)
     antes = [c.chunk_id for c in cands]
@@ -60,6 +61,16 @@ def main() -> None:
         print(f"[erro] {e}")
         return
     depois = [c.chunk_id for c in reordered]
+
+    explain_card("RERANK — REORDENAÇÃO", {
+        "query": args.query,
+        "reranker": args.reranker,
+        "entrada": f"{len(cands)} chunks do retrieval híbrido",
+        "saída": f"top {args.top} entra no contexto",
+        "antes": antes[:args.top],
+        "depois": depois[:args.top],
+        "salvo onde": "ranking em RAM; Phoenix registra span se tracing ligado",
+    })
 
     print("ORDEM ANTES (híbrido):")
     for i, cid in enumerate(antes, 1):

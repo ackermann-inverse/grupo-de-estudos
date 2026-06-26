@@ -27,7 +27,7 @@ import os
 import re
 from dataclasses import dataclass
 
-from common.tracing import set_output, span
+from common.tracing import approx_tokens_text, explain_card, set_output, span
 
 try:
     import requests
@@ -224,6 +224,15 @@ class Client:
                     r.raise_for_status()
                     out.append(r.json()["embedding"])
             set_output(cur, {"vectors": len(out), "dimensions": len(out[0]) if out else 0})
+            explain_card("CHAMADA EMBEDDING", {
+                "quem chamou": "aplicação -> runtime local",
+                "runtime": self.mode,
+                "modelo": self.embed_model,
+                "entrada": f"{len(texts)} texto(s); preview={[t[:160] for t in texts[:2]]}",
+                "saida": f"{len(out)} vetor(es), {len(out[0]) if out else 0} dimensões",
+                "contador": f"embed_calls={self.embed_calls}",
+                "salvo onde": "RAM da POC; Phoenix registra metadados se PHOENIX_TRACING=1",
+            })
             return out
 
     def generate(self, system: str, prompt: str, *, json_format: bool = False) -> str:
@@ -231,7 +240,13 @@ class Client:
         with span(
             "ollama.generate", kind="LLM",
             inputs={"system": system[:300], "prompt": prompt[:800]},
-            attributes={"llm.model_name": self.gen_model, "llm.provider": self.mode},
+            attributes={
+                "llm.model_name": self.gen_model,
+                "llm.provider": self.mode,
+                "llm.temperature": 0,
+                "llm.prompt_tokens.approx": approx_tokens_text(system + "\n" + prompt),
+                "llm.output_format": "json" if json_format else "text",
+            },
         ) as cur:
             if self.mode == "mock":
                 out = _mock_generate(system, prompt)
@@ -251,6 +266,17 @@ class Client:
                 r.raise_for_status()
                 out = r.json()["message"]["content"]
             set_output(cur, out)
+            explain_card("CHAMADA LLM", {
+                "quem chamou": "aplicação -> runtime local",
+                "runtime": self.mode,
+                "modelo": self.gen_model,
+                "temperature": "0",
+                "formato": "json" if json_format else "texto",
+                "entrada aprox": f"{approx_tokens_text(system + chr(10) + prompt)} tokens",
+                "saida aprox": f"{approx_tokens_text(out)} tokens",
+                "contador": f"gen_calls={self.gen_calls}",
+                "salvo onde": "LLM não grava memória; aplicação imprime/salva/traça",
+            })
             return out
 
 

@@ -10,6 +10,8 @@
 
 > **Comece aqui:** o [`QUICKSTART.md`](./QUICKSTART.md) permite escolher MOCK,
 > `llama3.2:1b` ou `llama3.2:3b`, com ou sem tracing no Phoenix.
+> Use `EXPLAIN=1 make poc3` (ou qualquer POC) para ver cartões didáticos no
+> terminal: quem chamou o modelo, quais parâmetros entraram, o que foi salvo e onde.
 
 > **Pergunta central:** como montar **contexto útil**, **recuperar conhecimento** e
 > manter **memória** sem bagunça nem risco?
@@ -113,7 +115,8 @@ maturidade técnica e foca em **decisões de engenharia**, não em tutorial de f
 
 O encontro alterna **teoria e prática**: cada bloco conceitual tem uma POC associada.
 A agenda (60/90/120 min), os tempos e as notas do apresentador estão em
-[`ROTEIRO.md`](./ROTEIRO.md). Os slides estão em [`slides/slides.md`](./slides/slides.md).
+[`ROTEIRO.md`](./ROTEIRO.md). Os slides estão em [`slides/slides.md`](./slides/slides.md);
+o PDF é gerado em `.generated/` com `make slides-pdf` e não é versionado.
 
 > **Convenção editorial** (herdada do trabalho do autor em *Engenharia de IA em
 > Produção*): distinguimos **evidência** (com citação), **opinião** (decisão de

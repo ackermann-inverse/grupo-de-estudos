@@ -23,6 +23,16 @@ services:
       timeout: 5s
       retries: 12
 
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: p2-rag-phoenix
+    ports:
+      - "6006:6006"
+    environment:
+      PHOENIX_WORKING_DIR: /mnt/data
+    volumes:
+      - phoenix:/mnt/data
+
   app:
     build:
       context: ..
@@ -35,9 +45,12 @@ services:
       OLLAMA_HOST: http://ollama:11434
       GEN_MODEL: llama3.2:3b
       EMBED_MODEL: nomic-embed-text
+      PHOENIX_COLLECTOR_ENDPOINT: http://phoenix:6006/v1/traces
+      PHOENIX_PROJECT: rag-engineering-pocs
     # Mantém o container vivo para rodar as POCs interativamente:
     #   docker compose -f docker/compose.yml run --rm app python demos/poc_a_retrieval/retrieval.py
     tty: true
 
 volumes:
   ollama:
+  phoenix:

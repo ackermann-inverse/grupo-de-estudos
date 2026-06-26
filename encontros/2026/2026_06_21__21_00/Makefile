@@ -13,7 +13,8 @@ TRACE_ENV := PHOENIX_TRACING=1 PHOENIX_PROJECT=$(PHOENIX_PROJECT)
 	phoenix-setup phoenix-start phoenix-stop phoenix-status \
 	trace-poc1 trace-poc2 trace-poc3 trace-poc4 trace-leak \
 	docker-up docker-down docker-pull docker-phoenix-start docker-phoenix-stop \
-	docker-trace-poc1 docker-trace-poc2 docker-trace-poc3 docker-trace-poc4 docker-trace-leak
+	docker-trace-poc1 docker-trace-poc2 docker-trace-poc3 docker-trace-poc4 docker-trace-leak \
+	slides-html slides-pdf
 
 help: ## mostra esta ajuda
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -75,6 +76,14 @@ trace-poc4: ## executa POC4 enviando traces ao Phoenix
 
 trace-leak: ## executa vazamento cross-tenant enviando traces ao Phoenix
 	@$(TRACE_ENV) $(MAKE) leak
+
+slides-html: ## gera preview HTML dos slides em .generated/
+	@mkdir -p ../../../.generated/slides
+	@npx --yes @marp-team/marp-cli@latest --theme ../../../assets/marp/grupo-estudos.css slides/slides.md -o ../../../.generated/slides/2026_06_21__21_00.html --allow-local-files
+
+slides-pdf: ## gera PDF dos slides em .generated/ (não versionado)
+	@mkdir -p ../../../.generated/slides
+	@npx --yes @marp-team/marp-cli@latest --theme ../../../assets/marp/grupo-estudos.css --pdf slides/slides.md -o ../../../.generated/slides/2026_06_21__21_00.pdf --allow-local-files
 
 docker-up: ## sobe Ollama + app via Docker Compose
 	@$(COMPOSE) up --build

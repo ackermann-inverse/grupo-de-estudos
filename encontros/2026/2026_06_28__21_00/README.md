@@ -50,6 +50,15 @@ make observe         # POC D — trace estruturado de uma consulta
 make extra && make cross   # cross-encoder REAL (opcional, ~1–2 GB)
 ```
 
+Para narrar o fluxo no terminal, rode qualquer POC com `EXPLAIN=1`. Exemplo:
+
+```bash
+EXPLAIN=1 make observe
+```
+
+Isso mostra cartões do tipo "quem chamou", "quais parâmetros entraram", "o que foi
+salvo" e "onde aparece no Phoenix/JSONL".
+
 **As 4 POCs (rodáveis):**
 
 | POC | Pasta | Demonstra | `make` |
@@ -202,6 +211,14 @@ make trace-eval        # roda a POC C enviando spans ao Phoenix
 make phoenix-stop
 ```
 
+Também há caminho Docker:
+
+```bash
+make docker-phoenix-start
+make docker-trace-observe
+make docker-phoenix-stop
+```
+
 Sem `PHOENIX_TRACING=1`, nada é enviado e as PoCs rodam igual. Detalhes em
 [`docs/observabilidade-phoenix.md`](./docs/observabilidade-phoenix.md).
 
@@ -240,6 +257,7 @@ Sem `PHOENIX_TRACING=1`, nada é enviado e as PoCs rodam igual. Detalhes em
 - Roteiro do apresentador (60/90 min): [`ROTEIRO.md`](./ROTEIRO.md)
 - Checklist de RAG Engineering: [`CHECKLIST.md`](./CHECKLIST.md)
 - Bibliografia (papers/specs/docs, datas de acesso): [`referencias.md`](./referencias.md)
-- Slides (Marp): [`slides/slides.md`](./slides/slides.md)
+- Slides (Marp): [`slides/slides.md`](./slides/slides.md). Gere HTML/PDF em
+  `.generated/` com `make slides-html` / `make slides-pdf`; PDFs não são versionados.
 - Decisões técnicas e limitações: [`docs/decisoes-e-limitacoes.md`](./docs/decisoes-e-limitacoes.md)
 - Matriz de compatibilidade: [`docs/matriz-compatibilidade.md`](./docs/matriz-compatibilidade.md)

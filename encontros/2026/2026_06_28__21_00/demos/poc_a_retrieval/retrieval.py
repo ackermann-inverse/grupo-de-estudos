@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from common.ollama_client import make_client  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
-from common.tracing import banner, traced  # noqa: E402
+from common.tracing import banner, explain_card, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 
@@ -33,15 +33,25 @@ def main() -> None:
     args = p.parse_args()
 
     client = make_client()
-    index = RagIndex(client, CORPUS_DIR)
-    print(f"== POC A · Retrieval ==  modelo={client.mode} | index={index.index_version}")
+    print(f"== POC A · Retrieval ==  modelo={client.mode}")
     print(banner())
     print(f"\nENTRADA (query): {args.query}\n")
+    index = RagIndex(client, CORPUS_DIR)
+    print(f"ÍNDICE: {index.index_version}\n")
 
     cols = {}
     for method in ("dense", "lexical", "hybrid"):
         cands = index.retrieve(args.query, method=method, k=args.k, tenant=args.tenant)
         cols[method] = cands
+
+    explain_card("RETRIEVAL — COMPARAÇÃO", {
+        "query": args.query,
+        "tenant": args.tenant,
+        "métodos": "dense, lexical, hybrid/RRF",
+        "top-k": args.k,
+        "index": index.index_version,
+        "salvo onde": "nada novo; candidatos ficam em RAM e podem virar trace no Phoenix",
+    })
 
     width = 34
     print(f"{'#':<2} {'dense':<{width}} {'lexical':<{width}} {'hybrid (RRF)':<{width}}")

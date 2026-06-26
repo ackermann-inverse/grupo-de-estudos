@@ -8,11 +8,13 @@ TRACE_ENV := PHOENIX_TRACING=1 PHOENIX_PROJECT=$(PHOENIX_PROJECT)
 
 .PHONY: help setup demo test test-real clean retrieval rerank eval sweep observe cross extra docker-up docker-down \
 	phoenix-setup phoenix-start phoenix-stop phoenix-status \
-	trace-retrieval trace-rerank trace-eval trace-observe
+	trace-retrieval trace-rerank trace-eval trace-observe \
+	docker-phoenix-start docker-phoenix-stop docker-trace-retrieval docker-trace-rerank \
+	docker-trace-eval docker-trace-observe slides-html slides-pdf
 
 help: ## mostra esta ajuda
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	 | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	 | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-24s\033[0m %s\n", $$1, $$2}'
 
 setup: ## cria venv, instala deps e orienta o download dos modelos
 	@bash scripts/setup.sh
@@ -43,6 +45,14 @@ trace-eval: ## POC C (avaliação) com traces no Phoenix
 
 trace-observe: ## POC D com traces no Phoenix
 	@$(TRACE_ENV) $(MAKE) observe
+
+slides-html: ## gera preview HTML dos slides em .generated/
+	@mkdir -p ../../../.generated/slides
+	@npx --yes @marp-team/marp-cli@latest --theme ../../../assets/marp/grupo-estudos.css slides/slides.md -o ../../../.generated/slides/2026_06_28__21_00.html --allow-local-files
+
+slides-pdf: ## gera PDF dos slides em .generated/ (não versionado)
+	@mkdir -p ../../../.generated/slides
+	@npx --yes @marp-team/marp-cli@latest --theme ../../../assets/marp/grupo-estudos.css --pdf slides/slides.md -o ../../../.generated/slides/2026_06_28__21_00.pdf --allow-local-files
 
 demo: ## demo principal: harness de avaliação (POC C)
 	@bash scripts/demo.sh
@@ -79,3 +89,21 @@ docker-up: ## sobe Ollama + app via Docker Compose
 
 docker-down: ## derruba o Compose
 	@docker compose -f docker/compose.yml down
+
+docker-phoenix-start: ## inicia o Phoenix no Compose
+	@docker compose -f docker/compose.yml up -d phoenix
+
+docker-phoenix-stop: ## encerra o Phoenix no Compose
+	@docker compose -f docker/compose.yml stop phoenix
+
+docker-trace-retrieval: docker-phoenix-start ## POC A com tracing no Compose
+	@docker compose -f docker/compose.yml run --rm --build -e PHOENIX_TRACING=1 app python demos/poc_a_retrieval/retrieval.py --query "código da entrega econômica"
+
+docker-trace-rerank: docker-phoenix-start ## POC B com tracing no Compose
+	@docker compose -f docker/compose.yml run --rm --build -e PHOENIX_TRACING=1 app python demos/poc_b_rerank/rerank.py --reranker llm --query "prazo de reembolso e estorno"
+
+docker-trace-eval: docker-phoenix-start ## POC C com tracing no Compose
+	@docker compose -f docker/compose.yml run --rm --build -e PHOENIX_TRACING=1 app python demos/poc_c_eval/evaluate.py
+
+docker-trace-observe: docker-phoenix-start ## POC D com tracing no Compose
+	@docker compose -f docker/compose.yml run --rm --build -e PHOENIX_TRACING=1 app python demos/poc_d_observability/observe.py

@@ -4,12 +4,12 @@ title: Context Engineering, RAG & Memória
 description: O problema não é prompt, é contexto. Context Engineering → Memória → RAG
 author: Ruan Pato
 paginate: true
-theme: default
+theme: grupo-estudos
 ---
 
 <!-- _class: lead -->
 
-# 🧠 Context Engineering, RAG & Memória
+# Context Engineering, RAG & Memória
 
 ### O problema não é **prompt**. É **contexto**.
 

@@ -1,0 +1,234 @@
+/* @theme grupo-estudos */
+
+@import 'default';
+
+:root {
+  --bg: #071526;
+  --panel: #0e2238;
+  --panel-2: #102a46;
+  --text: #f7fbff;
+  --muted: #a9bdd3;
+  --cyan: #55dff1;
+  --cyan-soft: rgba(85, 223, 241, 0.18);
+  --coral: #ff6b6b;
+  --yellow: #ffd166;
+  --green: #52d273;
+}
+
+section {
+  width: 960px;
+  height: 540px;
+  padding: 50px 62px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(85, 223, 241, 0.12), transparent 28%),
+    linear-gradient(135deg, var(--bg) 0%, #0a1a2d 58%, #06111e 100%);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 27px;
+  line-height: 1.34;
+  letter-spacing: 0;
+}
+
+section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 8px solid var(--cyan);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+section::after {
+  content: attr(data-marpit-pagination);
+  position: absolute;
+  right: 36px;
+  bottom: 26px;
+  color: rgba(247, 251, 255, 0.52);
+  font-size: 15px;
+}
+
+h1, h2, h3 {
+  color: var(--text);
+  letter-spacing: 0;
+}
+
+h1 {
+  margin: 0 0 22px;
+  max-width: 830px;
+  font-size: 58px;
+  line-height: 1.02;
+  font-weight: 860;
+}
+
+h2 {
+  margin: 0 0 22px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--cyan-soft);
+  font-size: 40px;
+  font-weight: 820;
+}
+
+h3 {
+  margin: 18px 0 12px;
+  color: var(--cyan);
+  font-size: 26px;
+}
+
+p, li {
+  color: var(--text);
+}
+
+ul, ol {
+  padding-left: 1.15em;
+}
+
+li {
+  margin: 8px 0;
+}
+
+strong {
+  color: var(--cyan);
+}
+
+em {
+  color: var(--yellow);
+  font-style: normal;
+}
+
+a {
+  color: var(--cyan);
+}
+
+code {
+  border: 1px solid rgba(85, 223, 241, 0.24);
+  border-radius: 5px;
+  padding: 0.06em 0.24em;
+  background: rgba(1, 9, 17, 0.58);
+  color: #dffbff;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.78em;
+}
+
+pre {
+  margin: 18px 0;
+  border: 1px solid rgba(85, 223, 241, 0.26);
+  border-radius: 8px;
+  padding: 16px 18px;
+  background: rgba(1, 9, 17, 0.72);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+}
+
+pre code {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1.35;
+}
+
+blockquote {
+  margin: 18px 0;
+  border-left: 7px solid var(--coral);
+  padding: 14px 20px;
+  background: rgba(255, 107, 107, 0.11);
+  color: var(--text);
+}
+
+blockquote p {
+  margin: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(14, 34, 56, 0.76);
+  font-size: 20px;
+}
+
+th, td {
+  border: 1px solid rgba(169, 189, 211, 0.22);
+  padding: 10px 12px;
+  color: var(--text);
+}
+
+th {
+  background: rgba(85, 223, 241, 0.14);
+  color: #eaffff;
+  font-weight: 800;
+}
+
+thead tr,
+tbody tr,
+tbody tr:nth-child(odd),
+tbody tr:nth-child(even) {
+  background: transparent;
+}
+
+tbody td {
+  background: rgba(14, 34, 56, 0.74);
+  color: var(--text);
+}
+
+tbody tr:nth-child(even) td {
+  background: rgba(16, 42, 70, 0.72);
+}
+
+section.lead {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 58px 70px;
+}
+
+section.lead::before {
+  border-top-color: var(--coral);
+}
+
+section.lead::after {
+  content: "";
+  position: absolute;
+  right: -110px;
+  top: -115px;
+  width: 405px;
+  height: 405px;
+  border: 2px solid rgba(85, 223, 241, 0.25);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 68px rgba(85, 223, 241, 0.055),
+    0 0 0 136px rgba(255, 107, 107, 0.035);
+}
+
+section.lead h1 {
+  max-width: 780px;
+  font-size: 68px;
+}
+
+section.lead h3,
+section.lead p {
+  max-width: 760px;
+  color: var(--muted);
+}
+
+section.lead strong {
+  color: var(--cyan);
+}
+
+section.small {
+  font-size: 22px;
+}
+
+section.compact {
+  font-size: 23px;
+}
+
+section.checkpoint {
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255, 107, 107, 0.14), transparent 27%),
+    linear-gradient(135deg, #091827 0%, #0a1e33 62%, #060d17 100%);
+}
+
+section.checkpoint h2 {
+  border-bottom-color: rgba(255, 107, 107, 0.4);
+}

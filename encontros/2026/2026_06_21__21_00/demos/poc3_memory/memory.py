@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from common.ollama_client import make_client  # noqa: E402
 from common.textutil import approx_tokens, cosine  # noqa: E402
-from common.tracing import banner, enabled, set_output, span, traced  # noqa: E402
+from common.tracing import banner, enabled, explain_card, set_output, span, traced  # noqa: E402
 
 # "Agora" fixo para a demo ser determinística (recência reproduzível).
 HOJE = date(2026, 6, 16)
@@ -90,6 +90,14 @@ class Memory:
                           motivo="palpite do modelo ou confiança < 0.5", text=text)
                 set_output(cur, {"decisao": "REJEITADO",
                                  "motivo": "palpite do modelo ou confiança < 0.5"})
+                explain_card("MEMÓRIA — WRITE REJEITADO", {
+                    "quem decidiu": "aplicação/política de escrita",
+                    "motivo": "palpite do modelo ou confiança < 0.5",
+                    "topico": topic,
+                    "fonte": source,
+                    "confianca": confidence,
+                    "salvo onde": "não foi salvo em mem.items",
+                })
                 return None
 
             # Conflito: nova informação confirmada invalida a anterior do mesmo tópico.
@@ -113,6 +121,16 @@ class Memory:
             self._log("write", id=item.id, topic=topic, scope=scope, source=source)
             set_output(cur, {"decisao": "GRAVADO", "id": item.id,
                              "invalidou": invalidadas or None})
+            explain_card("MEMÓRIA — WRITE", {
+                "quem gravou": "aplicação/política de memória",
+                "id": item.id,
+                "tipo": f"{scope}/{kind}",
+                "topico": topic,
+                "fonte": source,
+                "confianca": confidence,
+                "invalidou": invalidadas or "nada",
+                "salvo onde": "mem.items em RAM; audit em mem.audit; Phoenix se ligado",
+            })
             return item
 
     # ---- RETRIEVE (com política de recuperação) --------------------------- #
@@ -142,6 +160,13 @@ class Memory:
                 set_output(cur, {"estrategia": "dump_all (tudo, sem filtro)",
                                  "recuperadas": [i.id for i in tudo],
                                  "inclui_invalidadas": True})
+                explain_card("MEMÓRIA — RETRIEVE DUMP_ALL", {
+                    "quem recuperou": "aplicação sem política seletiva",
+                    "estratégia": "pegar tudo do usuário/tenant",
+                    "recuperadas": [i.id for i in tudo],
+                    "risco": "inclui ruído, expiradas e invalidada(s)",
+                    "salvo onde": "nada novo; apenas leitura de mem.items",
+                })
                 return tudo
 
             q = self.client.embed([query])[0]
@@ -188,6 +213,15 @@ class Memory:
             set_output(cur, {"estrategia": "seletiva (similaridade+recência+importância)",
                              "recuperadas": [i.id for i in out],
                              "scores_top": [round(s, 3) for s, _ in scored[:5]]})
+            explain_card("MEMÓRIA — RETRIEVE SELETIVO", {
+                "quem recuperou": "aplicação/política de recuperação",
+                "query": query,
+                "candidatas": len(viaveis),
+                "sim_min": sim_min,
+                "budget": f"{budget_tokens} tokens aprox.",
+                "recuperadas": [i.id for i in out] or "nenhuma confiável",
+                "salvo onde": "nada novo; decisão aparece no terminal/Phoenix",
+            })
             return out
 
     # ---- FORGET (direito ao esquecimento) --------------------------------- #
@@ -198,6 +232,12 @@ class Memory:
             removidas = antes - len(self.items)
             self._log("forget_user", user=user, removidas=removidas)
             set_output(cur, {"removidas": removidas})
+            explain_card("MEMÓRIA — FORGET", {
+                "quem apagou": "aplicação/operação explícita",
+                "usuário": user,
+                "removidas": removidas,
+                "salvo onde": "mem.items foi reescrito em RAM; mem.audit registra a operação",
+            })
             return removidas
 
     def _log(self, op: str, **kw) -> None:

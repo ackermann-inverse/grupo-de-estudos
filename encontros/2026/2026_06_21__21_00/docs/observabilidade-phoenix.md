@@ -34,6 +34,15 @@ make trace-poc4
 make trace-leak
 ```
 
+Se quiser narrar cada etapa também no terminal, combine com `EXPLAIN=1`:
+
+```bash
+EXPLAIN=1 make trace-poc3
+```
+
+O Phoenix mostra a árvore visual dos spans; o `EXPLAIN=1` mostra cartões didáticos
+com "quem chamou", "quais parâmetros entraram", "o que foi salvo" e "onde foi salvo".
+
 O projeto no Phoenix se chama `context-rag-pocs`. Abra um trace para mostrar:
 
 - o span-raiz da PoC;

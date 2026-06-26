@@ -23,7 +23,7 @@ from common.ollama_client import make_client  # noqa: E402
 from common.observability import RagTrace, Timer, TraceLogger  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
 from common.rerankers import get_reranker  # noqa: E402
-from common.tracing import banner, traced  # noqa: E402
+from common.tracing import banner, explain_card, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 RUNTIME = os.path.join(os.path.dirname(__file__), ".runtime")
@@ -46,6 +46,11 @@ def main() -> None:
     os.makedirs(RUNTIME, exist_ok=True)
     client = make_client()
     timer = Timer()
+    print(f"== POC D · Observabilidade ==  modelo={client.mode}")
+    print("   Esta POC tem DUAS trilhas de observabilidade:")
+    print("   (1) trace JSONL próprio, escrito em .runtime/trace.jsonl (sempre)")
+    print(banner().replace("🔭 observabilidade:", "   (2) Phoenix —"))
+    print()
 
     with timer("build_index"):
         index = RagIndex(client, CORPUS_DIR)
@@ -81,11 +86,15 @@ def main() -> None:
 
     logger = TraceLogger(os.path.join(RUNTIME, "trace.jsonl"))
     logger.log(trace)
-    print(f"== POC D · Observabilidade ==  modelo={client.mode}")
-    print("   Esta POC tem DUAS trilhas de observabilidade:")
-    print("   (1) trace JSONL próprio, escrito em .runtime/trace.jsonl (sempre)")
-    print(banner().replace("🔭 observabilidade:", "   (2) Phoenix —"))
-    print()
+    explain_card("OBSERVABILIDADE — TRACE SALVO", {
+        "query": args.query,
+        "arquivo": os.path.relpath(os.path.join(RUNTIME, "trace.jsonl")),
+        "index": index.index_version,
+        "fontes": trace.sources,
+        "latência total": f"{trace.latency_ms['total']} ms",
+        "custo proxy": trace.cost,
+        "Phoenix": "span adicional se PHOENIX_TRACING=1",
+    })
     print(TraceLogger.summary(trace))
     print(f"\nTrace completo (JSONL): {os.path.relpath(os.path.join(RUNTIME, 'trace.jsonl'))}")
     print("Em produção: isto vira span OpenTelemetry (GenAI) + dashboards de qualidade, "

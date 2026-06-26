@@ -30,7 +30,7 @@ from common import metrics  # noqa: E402
 from common.ollama_client import make_client  # noqa: E402
 from common.rag_index import RagIndex  # noqa: E402
 from common.rerankers import get_reranker  # noqa: E402
-from common.tracing import banner, traced  # noqa: E402
+from common.tracing import banner, explain_card, traced  # noqa: E402
 
 CORPUS_DIR = os.path.join(os.path.dirname(__file__), "..", "corpus")
 GOLDEN = os.path.join(os.path.dirname(__file__), "..", "golden", "golden.jsonl")
@@ -110,6 +110,14 @@ def main() -> None:
     print(f"== POC C · RAG eval ==  modelo={client.mode} | {len(golden)} queries | "
           f"k={args.k} top={args.top} rerank={args.rerank}")
     print(banner())
+    explain_card("RAG EVAL — CONFIGURAÇÃO", {
+        "golden set": os.path.relpath(GOLDEN),
+        "queries": len(golden),
+        "k/top": f"{args.k}/{args.top}",
+        "reranker": args.rerank,
+        "camadas": "retriever, contexto montado, resposta final",
+        "salvo onde": "métricas no terminal; Phoenix se PHOENIX_TRACING=1",
+    })
 
     if args.dims_sweep:
         print("\nMatryoshka — recall@k e nDCG@k por dimensão de embedding:")
@@ -128,6 +136,12 @@ def main() -> None:
     rows, agg = run(index, golden, k=args.k, top=args.top, reranker=args.rerank,
                     client=client, do_answer=True)
     _print_agg(f"Agregado (retriever + contexto + resposta)", agg)
+    explain_card("RAG EVAL — RESULTADO", {
+        "recall@k": f"{agg.get('recall@k', 0):.3f}",
+        "ctx_recall": f"{agg.get('ctx_recall', 0):.3f}",
+        "answer_match": f"{agg.get('answer_match', 0):.3f}",
+        "uso": "regressão antes/depois de chunking, embedding, top-k, reranker ou prompt",
+    })
 
     falhas = [(g["query"], r) for g, r in zip(golden, rows) if r.get("answer_match") == 0.0]
     if falhas:

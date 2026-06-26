@@ -153,11 +153,12 @@ def answer(query: str, *, method: str = "hybrid", k: int = 6, top: int = 3,
     }
 
 
-def _print_result(res: dict, *, show_scores: bool) -> None:
-    print(f"== POC2 RAG ==  método={res['method']} | tenant={res['tenant']} | "
-          f"modelo={res['mode']}")
-    print(banner())
-    print(f"\nENTRADA (query): {res['query']}\n")
+def _print_result(res: dict, *, show_scores: bool, include_header: bool = True) -> None:
+    if include_header:
+        print(f"== POC2 RAG ==  método={res['method']} | tenant={res['tenant']} | "
+              f"modelo={res['mode']}")
+        print(banner())
+        print(f"\nENTRADA (query): {res['query']}\n")
     print("CANDIDATOS RECUPERADOS (após filtro por tenant):")
     for c in res["candidatos"]:
         line = f"  - {c.chunk_id:28s} [{c.meta.get('tenant','?')}/{c.meta.get('status','?')}]"
@@ -194,9 +195,16 @@ def main() -> None:
         print(">>> ATENÇÃO: filtro por tenant DESLIGADO. Documentos de outros "
               "clientes podem vazar para o contexto.\n")
 
+    client = make_client()
+    print(f"== POC2 RAG ==  método={args.method} | tenant={tenant} | "
+          f"modelo={client.mode}")
+    print(banner())
+    print(f"\nENTRADA (query): {args.query}\n")
+
     res = answer(args.query, method=args.method, k=args.k, top=args.top,
-                 tenant=tenant, include_adversarial=args.include_adversarial)
-    _print_result(res, show_scores=args.show_scores or True)
+                 tenant=tenant, include_adversarial=args.include_adversarial,
+                 client=client)
+    _print_result(res, show_scores=args.show_scores or True, include_header=False)
 
 
 if __name__ == "__main__":

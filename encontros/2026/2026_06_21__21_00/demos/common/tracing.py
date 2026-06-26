@@ -20,6 +20,28 @@ def enabled() -> bool:
     return os.environ.get("PHOENIX_TRACING", "0") == "1"
 
 
+def explain_enabled() -> bool:
+    return os.environ.get("EXPLAIN", "0") == "1"
+
+
+def approx_tokens_text(text: str) -> int:
+    if not text:
+        return 0
+    # Aproximação grosseira e didática. Não substitui tokenizador do modelo.
+    return max(1, len(text.split()) * 4 // 3)
+
+
+def explain_card(title: str, rows: dict[str, Any] | list[tuple[str, Any]]) -> None:
+    """Cartão de terminal para explicar o fluxo sem depender do Phoenix."""
+    if not explain_enabled():
+        return
+
+    pairs = rows.items() if isinstance(rows, dict) else rows
+    print(f"\n🔎 EXPLAIN — {title}")
+    for key, value in pairs:
+        print(f"   {key:<18}: {value}")
+
+
 def banner() -> str:
     """Linha didática para o terminal: explica SE, COMO e ONDE os passos são salvos."""
     if enabled():
@@ -32,12 +54,14 @@ def banner() -> str:
             "🔭 observabilidade: tracing LIGADO\n"
             f"   • cada passo (embed, retrieve, rerank, generate...) vira um 'span'\n"
             f"   • enviados para o Phoenix em {endpoint} (projeto '{proj}')\n"
-            f"   • abra a UI em {ui} | dados locais ficam em ./.phoenix/ (não versionado)"
+            f"   • abra a UI em {ui} | dados locais ficam em ./.phoenix/ (não versionado)\n"
+            "   • para ver cartões didáticos no terminal, rode também com EXPLAIN=1"
         )
     return (
         "🔭 observabilidade: tracing DESLIGADO (rodando normal)\n"
         "   • para ver cada passo no Phoenix: 'make phoenix-start' e rode com "
         "PHOENIX_TRACING=1\n"
+        "   • para ver cartões didáticos sem Phoenix: rode com EXPLAIN=1\n"
         "   • sem isso, nada é enviado a lugar nenhum — as PoCs só imprimem no terminal"
     )
 

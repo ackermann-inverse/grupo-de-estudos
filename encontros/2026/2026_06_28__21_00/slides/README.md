@@ -9,15 +9,15 @@
 - **CLI (sem instalar nada permanentemente):**
 
 ```bash
-# servidor com hot-reload
-npx @marp-team/marp-cli@latest -s slides/
+# gerar preview HTML em .generated/
+make slides-html
 
-# exportar para HTML
-npx @marp-team/marp-cli@latest slides/slides.md -o slides/slides.html
-
-# exportar para PDF (precisa de Chromium; em CI use --allow-local-files)
-npx @marp-team/marp-cli@latest slides/slides.md --pdf
+# gerar PDF em .generated/ (precisa de Chromium)
+make slides-pdf
 ```
+
+O tema visual fica em [`../../../assets/marp/grupo-estudos.css`](../../../assets/marp/grupo-estudos.css).
+O PDF é artefato gerado e não deve ser commitado.
 
 ## Notas do apresentador
 
