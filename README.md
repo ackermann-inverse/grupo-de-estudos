@@ -5,6 +5,13 @@ redes, concorrência, mensageria, observabilidade e **IA aplicada** (Context Eng
 RAG, memória, avaliação e observabilidade de RAG). Cada encontro reúne notas, slides e
 **provas de conceito (PoCs)** rodáveis em várias linguagens (Go, Node.js, Python).
 
+> 🌐 **English summary.** Notes, slides and runnable proofs of concept from a small engineering
+> study group. Topics so far: Azure Service Bus messaging, concurrency versus parallelism (Go,
+> Node.js, Python), harness engineering for AI agents, context engineering, RAG and memory, and
+> RAG engineering (hybrid retrieval, reranking, an evaluation harness and tracing). The material
+> is in Portuguese. The recent sessions run locally on CPU, with open models through Ollama or a
+> deterministic mock mode. Educational, not production software.
+
 > ⚠️ **Repositório educacional.** Isto **não** é software de produção. São experimentos
 > e PoCs feitos para **aprender e discutir** — muitas vezes simplificados de propósito.
 > Leia o [`DISCLAIMER.md`](./DISCLAIMER.md) antes de reutilizar qualquer coisa.
